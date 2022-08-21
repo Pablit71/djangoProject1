@@ -2,29 +2,38 @@ import json
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView, DetailView
 
 from ads.models import Category, Ads
 
 
-def index(request):
-    if request.method == "GET":
+class IndexView(View):
+    def get(self, request):
         return JsonResponse({"status": "ok"}, status=200)
 
 
-@csrf_exempt
-def get_cat(request):
-    if request.method == "GET":
-        cat = Category.objects.all()
+@method_decorator(csrf_exempt, name='dispatch')
+class GetCat(ListView):
+    model = Category
+
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+        search_cat = request.GET.get("cat", None)
+        if search_cat:
+            self.object_list = self.object_list.filter(cat=search_cat)
+
         response = []
-        for cat_ in cat:
+        for cat_ in self.object_list:
             response.append({
                 "id": cat_.id,
                 "name": cat_.name
             })
         return JsonResponse(response, safe=False)
 
-    if request.method == "POST":
+    def post(self, request):
         cat_data = json.loads(request.body)
         category = Category()
         category.name = cat_data["name"]
@@ -38,11 +47,16 @@ def get_cat(request):
         })
 
 
-def get_ads(request):
-    if request.method == "GET":
-        ads = Ads.objects.all()
+class GetAds(ListView):
+    model = Ads
+
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+        search_ads = request.GET.get("cat", None)
+        if search_ads:
+            self.object_list = self.object_list.filter(cat=search_ads)
         response = []
-        for ads_ in ads:
+        for ads_ in self.object_list:
             response.append({
                 "id": ads_.id,
                 "name": ads_.name,
@@ -53,7 +67,8 @@ def get_ads(request):
                 "is_published": ads_.is_published
             })
         return JsonResponse(response, safe=False)
-    elif request.method == "POST":
+
+    def post(self, request):
         ads_data = json.loads(request.body)
         ads = Ads()
         ads.id = ads_data["id"]
@@ -77,18 +92,22 @@ def get_ads(request):
         })
 
 
-def get_cat_one(request, cat_id):
-    if request.method == "GET":
-        cat = Category.objects.get(pk=cat_id)
+class CatOne(DetailView):
+    model = Category
+
+    def get(self, request, *args, **kwargs):
+        cat = self.get_object()
         return JsonResponse({
             "id": cat.id,
             "name": cat.name
         })
 
 
-def get_ads_one(request, ads_id):
-    if request.method == "GET":
-        ads = Ads.objects.get(pk=ads_id)
+class AdsOne(DetailView):
+    model = Ads
+
+    def get(self, request, *args, **kwargs):
+        ads = self.get_object()
         return JsonResponse({
             "id": ads.id,
             "name": ads.name,
