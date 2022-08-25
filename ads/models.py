@@ -47,11 +47,11 @@ class User(models.Model):
 class Ads(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=400)
-    author_id = models.ManyToManyField(User)  ###
+    author_id = models.ManyToManyField(User)
     price = models.FloatField()
     description = models.CharField(max_length=2000, null=True)
     is_published = models.BooleanField(default=False)
-    # image = models.ImageField
+    image = models.ImageField(upload_to='images/', null=True)
     category_id = models.ManyToManyField(Category)
 
     class Meta:
