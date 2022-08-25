@@ -31,10 +31,15 @@ class User(models.Model):
     id = models.IntegerField(primary_key=True)
     last_name = models.CharField(max_length=400, null=True)
     first_name = models.CharField(max_length=400)
+    username = models.CharField(max_length=200, null=True)
     password = models.CharField(max_length=400)
     role = models.CharField(max_length=400)
     age = models.IntegerField()
-    location_id = models.ManyToManyField(Location)
+    location = models.ForeignKey(
+        'Location',
+        on_delete=models.CASCADE,
+        related_name='+'
+    )
 
     class Meta:
         verbose_name = "Продавец"
@@ -47,12 +52,20 @@ class User(models.Model):
 class Ads(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=400)
-    author_id = models.ManyToManyField(User)
+    author = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        null=True
+    )
     price = models.FloatField()
     description = models.CharField(max_length=2000, null=True)
     is_published = models.BooleanField(default=False)
     image = models.ImageField(upload_to='images/', null=True)
-    category_id = models.ManyToManyField(Category)
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.CASCADE,
+        null=True
+    )
 
     class Meta:
         verbose_name = "Инфо"
