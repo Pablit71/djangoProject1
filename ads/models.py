@@ -16,8 +16,8 @@ class Category(models.Model):
 class Location(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=400)
-    lat = models.FloatField()
-    lng = models.FloatField()
+    lat = models.FloatField(null=True)
+    lng = models.FloatField(null=True)
 
     class Meta:
         verbose_name = "Локация"

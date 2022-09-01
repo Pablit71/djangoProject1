@@ -25,7 +25,8 @@ urlpatterns = [
     path("", views.IndexView.as_view()),
     path("ads/", include('ads.urls_ads')),
     path("cat/", include('ads.urls_cat')),
-    path("users/", include('ads.urls_user'))
+    path("users/", include('ads.urls_user')),
+    path("location/create", views.CreateLocation.as_view())
 ]
 
 if settings.DEBUG:

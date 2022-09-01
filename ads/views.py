@@ -2,7 +2,7 @@ import json
 
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -109,11 +109,11 @@ class GetAds(ListView):
             list_ads.append({
                 "id": ads_.id,
                 "name": ads_.name,
-                "author": ads_.author.first_name,
                 "price": ads_.price,
                 "description": ads_.description,
                 "is_published": ads_.is_published,
-                "image": ads_.image.url
+                "image": ads_.image.url,
+                "author": ads_.author.first_name,
             })
 
         response = {
@@ -134,7 +134,6 @@ class CreateAds(CreateView):
         ads = Ads.objects.create(
             id=ads_data["id"],
             name=ads_data["name"],
-            author_id=ads_data["author_id"],
             price=ads_data["price"],
             description=ads_data["description"],
             is_published=ads_data["is_published"],
@@ -144,7 +143,6 @@ class CreateAds(CreateView):
         return JsonResponse({
             "id": ads.id,
             "name": ads.name,
-            "author_id": ads.author_id,
             "price": ads.price,
             "description": ads.description,
             "is_published": ads.is_published,
@@ -253,13 +251,20 @@ class GetUser(ListView):
         self.object_list = self.object_list.order_by("username")
         response = []
         for users in self.object_list:
+            count = 0
+            ads_user = Ads.objects.all()
+            for count_ads in ads_user:
+                if users.id == count_ads.author_id:
+                    count += 1
             response.append({
+                "id": users.id,
                 "last_name": users.last_name,
                 "first_name": users.first_name,
                 "username": users.username,
                 "role": users.role,
                 "age": users.age,
                 "location": users.location.name,
+                "total_ads": count
             })
         return JsonResponse(response, safe=False)
 
@@ -276,6 +281,7 @@ class UserOne(DetailView):
             "role": user.role,
             "age": user.age,
             "location": user.location.name,
+            "total_ads": user.author_id.count
         })
 
 
@@ -295,6 +301,8 @@ class CreateUser(CreateView):
             age=user_data["age"],
             location=user_data["location"]
         )
+
+#
 
         return JsonResponse({
             "last_name": user.last_name,
@@ -344,3 +352,27 @@ class DeleteUser(DeleteView):
         super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class CreateLocation(CreateView):
+    model = Location
+    fields = ["id", "name", "lat", "lng"]
+
+    def post(self, request, *args, **kwargs):
+        location_data = json.loads(request.body)
+        location = Location.objects.create(
+            id=location_data["id"],
+            name=location_data["name"],
+            lat=location_data["lat"],
+            lng=location_data["lng"],
+        )
+
+        location.name = get_object_or_404(Location, pk=location_data["id"])
+
+        return JsonResponse({
+            "id": location.id,
+            "name": location.name,
+            "lat": location.lat,
+            "lng": location.lng,
+        })
