@@ -27,8 +27,7 @@ urlpatterns = [
     path("ads/", include('ads.urls_ads')),
     path("cat/", include('ads.urls_cat')),
     path("users/", include('ads.urls_user')),
-    path("location/create", views.CreateLocation.as_view()),
-    path("location", views.GetLocation.as_view())
+    path("location/", include('ads.urls_location') )
 ]
 
 if settings.DEBUG:
