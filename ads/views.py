@@ -7,8 +7,11 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 
 from ads.models import Category, Ads, User, Location
+from ads.serializers import AdsSerializers, UserSerializer, CategorySerializer, LocationSerializer, \
+    CategoryOneSerializer
 from djangoProject1 import settings
 
 
@@ -17,43 +20,15 @@ class IndexView(View):
         return JsonResponse({"status": "ok"}, status=200)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class GetCat(ListView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        search_cat = request.GET.get("cat", None)
-        if search_cat:
-            self.object_list = self.object_list.filter(cat=search_cat)
-
-        self.object_list = self.object_list.order_by("name")
-
-        response = []
-        for cat_ in self.object_list:
-            response.append({
-                "id": cat_.id,
-                "name": cat_.name
-            })
-        return JsonResponse(response, safe=False)
+class GetCat(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class CreateCat(CreateView):
-    model = Category
-    fields = ["id", "name"]
+class CreateCat(CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
-    def post(self, request, *args, **kwargs):
-        cat_data = json.loads(request.body)
-        category = Category.objects.create(
-            id=cat_data["id"],
-            name=cat_data["name"]
-        )
-
-        return JsonResponse({
-            "id": category.id,
-            "name": category.name
-        })
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -104,20 +79,8 @@ class GetAds(ListView):
         page_num = request.GET.get("page")
         page_obj = paginator.get_page(page_num)
 
-        list_ads = []
-        for ads_ in page_obj:
-            list_ads.append({
-                "id": ads_.id,
-                "name": ads_.name,
-                "price": ads_.price,
-                "description": ads_.description,
-                "is_published": ads_.is_published,
-                "image": ads_.image.url,
-                "author": ads_.author.first_name,
-            })
-
         response = {
-            "items": list_ads,
+            "items": AdsSerializers(page_obj, many=True).data,
             "num_pages": paginator.num_pages,
             "total": paginator.count
         }
@@ -190,16 +153,9 @@ class DeleteAds(DeleteView):
         return JsonResponse({"status": "ok"}, status=200)
 
 
-class CatOne(DetailView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        cat = self.get_object()
-        return JsonResponse({
-            "id": cat.id,
-            "name": cat.name
-        })
-
+class CatOne(RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryOneSerializer
 
 class AdsOne(DetailView):
     model = Ads
@@ -249,23 +205,23 @@ class GetUser(ListView):
             self.object_list = self.object_list.filter(user=search_user)
 
         self.object_list = self.object_list.order_by("username")
-        response = []
+
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_num = request.GET.get("page")
+        page_obj = paginator.get_page(page_num)
+
         for users in self.object_list:
             count = 0
             ads_user = Ads.objects.all()
             for count_ads in ads_user:
                 if users.id == count_ads.author_id:
                     count += 1
-            response.append({
-                "id": users.id,
-                "last_name": users.last_name,
-                "first_name": users.first_name,
-                "username": users.username,
-                "role": users.role,
-                "age": users.age,
-                "location": users.location.name,
-                "total_ads": count
-            })
+
+        response = {
+            "items": UserSerializer(page_obj, many=True).data,
+            "num_pages": paginator.num_pages,
+            "total": paginator.count
+        }
         return JsonResponse(response, safe=False)
 
 
@@ -302,7 +258,7 @@ class CreateUser(CreateView):
             location=user_data["location"]
         )
 
-#
+        #
 
         return JsonResponse({
             "last_name": user.last_name,
@@ -376,3 +332,27 @@ class CreateLocation(CreateView):
             "lat": location.lat,
             "lng": location.lng,
         })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class GetLocation(ListView):
+    model = Location
+
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+        search_location = request.GET.get("location", None)
+        if search_location:
+            self.object_list = self.object_list.filter(cat=search_location)
+
+        self.object_list = self.object_list.order_by("name")
+
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_num = request.GET.get("page")
+        page_obj = paginator.get_page(page_num)
+
+        response = {
+            "items": LocationSerializer(page_obj, many=True).data,
+            "num_pages": paginator.num_pages,
+            "total": paginator.count
+        }
+        return JsonResponse(response, safe=False)

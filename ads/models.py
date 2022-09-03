@@ -36,7 +36,7 @@ class User(models.Model):
     role = models.CharField(max_length=400)
     age = models.IntegerField()
     location = models.ForeignKey(
-        'Location',
+        Location,
         on_delete=models.CASCADE,
         related_name='+'
     )
@@ -44,6 +44,7 @@ class User(models.Model):
     class Meta:
         verbose_name = "Продавец"
         verbose_name_plural = "Продавцы"
+
 
     def __str__(self):
         return self.last_name
@@ -53,7 +54,8 @@ class Ads(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=400)
     author = models.ForeignKey(
-        'User',
+        User,
+        related_name='author_name',
         on_delete=models.CASCADE,
         null=True
     )

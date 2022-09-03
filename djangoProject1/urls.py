@@ -22,11 +22,13 @@ from ads import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api-auth/", include('rest_framework.urls')),
     path("", views.IndexView.as_view()),
     path("ads/", include('ads.urls_ads')),
     path("cat/", include('ads.urls_cat')),
     path("users/", include('ads.urls_user')),
-    path("location/create", views.CreateLocation.as_view())
+    path("location/create", views.CreateLocation.as_view()),
+    path("location", views.GetLocation.as_view())
 ]
 
 if settings.DEBUG:
