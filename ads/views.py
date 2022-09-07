@@ -8,6 +8,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 
 from ads.models import Category, Ads, User, Location
 from ads.serializers import AdsSerializer, UserSerializer, CategorySerializer, LocationSerializer, \
@@ -21,7 +22,7 @@ class IndexView(View):
         return JsonResponse({"status": "ok"}, status=200)
 
 
-# category VIEW
+# Category VIEW
 class GetCat(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -32,9 +33,9 @@ class CatOne(RetrieveAPIView):
     serializer_class = CategoryOneSerializer
 
 
-class CreateCat(CreateAPIView):
+class DeleteCat(DestroyAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    serializer_class = CategoryDeleteSerializer
 
 
 class UpdateCat(UpdateAPIView):
@@ -42,9 +43,9 @@ class UpdateCat(UpdateAPIView):
     serializer_class = CategorySerializer
 
 
-class DeleteCat(DestroyAPIView):
+class CreateCat(CreateAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategoryDeleteSerializer
+    serializer_class = CategorySerializer
 
 
 # ads VIEW
@@ -52,25 +53,58 @@ class GetAds(ListAPIView):
     queryset = Ads.objects.all()
     serializer_class = AdsSerializer
 
+    def get(self, request, *args, **kwargs):
+        ads_category_id = request.GET.get('cat', None)
+        if ads_category_id:
+            self.queryset = self.queryset.filter(
+                category__id__exact=ads_category_id
+            )
 
-class CreateAds(CreateAPIView):
-    queryset = Ads.objects.all()
-    serializer_class = AdsSerializer
+        ads_text = request.GET.get('text', None)
+        if ads_text:
+            self.queryset = self.queryset.filter(
+                text__icontains=ads_text
+            )
 
+        ads_location = request.GET.get('location', None)
+        if ads_location:
+            self.queryset = self.queryset.filter(
+                author__location__name__icontains=ads_location
+            )
 
-class UpdateAds(UpdateAPIView):
-    queryset = Ads.objects.all()
-    serializer_class = AdsSerializer
+        ads_price_from = request.GET.get('price_from', None)
+        if ads_price_from:
+            self.queryset = self.queryset.filter(
+                price__gte=ads_price_from
+            )
 
+        ads_price_to = request.GET.get('price_to', None)
+        if ads_price_to:
+            self.queryset = self.queryset.filter(
+                price__lte=ads_price_to
+            )
 
-class DeleteAds(DestroyAPIView):
-    queryset = Ads.objects.all()
-    serializer_class = AdsDeleteSerializer
+        return super().get(request, *args, **kwargs)
 
 
 class AdsOne(RetrieveAPIView):
-    queryset = Ads.objects.all()
+    queryset = Category.objects.all()
     serializer_class = AdsOneSerializer
+
+
+class DeleteAds(DestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = AdsDeleteSerializer
+
+
+class UpdateAds(UpdateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = AdsSerializer
+
+
+class CreateAds(CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = AdsSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -95,53 +129,12 @@ class AdsImageView(UpdateView):
 
 
 # User VIEW
-
-class GetUser(ListAPIView):
+class UserSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-
-class UserOne(RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserOneSerializer
-
-
-class CreateUser(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UpdateUser(UpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class DeleteUser(DestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserDeleteSerializer
 
 
 # Location VIEW
-class CreateLocation(CreateAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationSerializer
-
-
-class GetLocation(ListAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationSerializer
-
-
-class OneLocation(RetrieveAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationOneSerializer
-
-
-class DeleteLocation(DestroyAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationDeleteSerializer
-
-
-class UpdateLocation(UpdateAPIView):
+class LocationSet(ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
