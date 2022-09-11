@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from ads import views
-from ads.views import GetAds, LocationSet, UserSet, IndexView
+from ads.views import GetAds, LocationSet, UserSet, IndexView, CompilationGet
 from authentication.views import UserCreateView
 
 router = routers.SimpleRouter()
@@ -33,8 +33,7 @@ urlpatterns = [
     path("cat/", include('ads.urls_cat')),
     path("ads/", include('ads.urls_ads')),
     path('user/', include('authentication.url_login')),
-
-
+    path('comp/', CompilationGet.as_view())
 ]
 urlpatterns += router.urls
 

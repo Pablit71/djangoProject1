@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ads.models import Ads, User, Location, Category
+from ads.models import Ads, User, Location, Category, Compilation
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -79,3 +79,26 @@ class AdsDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ads
         fields = ["id", "name", "author", "price", "description", "is_published", "image"]
+
+
+class CompilationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Compilation
+        fields = '__all__'
+
+
+class CompilationCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Compilation
+        fields = '__all__'
+
+
+class CompilationUpdateSerializer(serializers.ModelSerializer):
+    owner = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Compilation
+        fields = '__all__'

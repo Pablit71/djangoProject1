@@ -1,6 +1,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.forms import forms
+from rest_framework.fields import ListField
 
 
 class Category(models.Model):
@@ -80,8 +81,11 @@ class Ads(models.Model):
 class Compilation(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
-    name_compilation = ArrayField(models.ManyToManyField(
-        Ads,
-        null=True,
-    ),
-        blank=True)
+    items = models.ManyToManyField(Ads)
+
+    class Meta:
+        verbose_name = "Подборка"
+        verbose_name_plural = "Подборки"
+
+    def __str__(self):
+        return str(self.name)

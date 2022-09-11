@@ -11,10 +11,11 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from ads.models import Category, Ads, User, Location
+from ads.models import Category, Ads, User, Location, Compilation
 from ads.serializers import AdsSerializer, UserSerializer, CategorySerializer, LocationSerializer, \
     CategoryOneSerializer, CategoryDeleteSerializer, AdsDeleteSerializer, AdsOneSerializer, UserOneSerializer, \
-    UserDeleteSerializer, LocationDeleteSerializer, LocationOneSerializer
+    UserDeleteSerializer, LocationDeleteSerializer, LocationOneSerializer, CompilationSerializer, \
+    CompilationCreateSerializer, CompilationUpdateSerializer
 from authentication.permissions import AdminGetPermission, GetUserPermission
 from djangoProject1 import settings
 
@@ -96,25 +97,25 @@ class GetAds(ListAPIView):
 
 
 class AdsOne(RetrieveAPIView):
-    queryset = Category.objects.all()
+    queryset = Ads.objects.all()
     serializer_class = AdsOneSerializer
     permission_classes = [IsAuthenticated, GetUserPermission, GetUserPermission]
 
 
 class DeleteAds(DestroyAPIView):
-    queryset = Category.objects.all()
+    queryset = Ads.objects.all()
     serializer_class = AdsDeleteSerializer
     permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 class UpdateAds(UpdateAPIView):
-    queryset = Category.objects.all()
+    queryset = Ads.objects.all()
     serializer_class = AdsSerializer
-    permission_classes = [IsAuthenticated,  GetUserPermission, GetUserPermission]
+    permission_classes = [IsAuthenticated, GetUserPermission, GetUserPermission]
 
 
 class CreateAds(CreateAPIView):
-    queryset = Category.objects.all()
+    queryset = Ads.objects.all()
     serializer_class = AdsSerializer
     permission_classes = [IsAuthenticated, GetUserPermission, GetUserPermission]
 
@@ -152,3 +153,33 @@ class LocationSet(ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     permission_classes = [IsAuthenticated, AdminGetPermission]
+
+
+class CompilationGet(ListAPIView):
+    queryset = Compilation.objects.all()
+    serializer_class = CompilationSerializer
+
+
+class CompilationDetailView(RetrieveAPIView):
+    queryset = Compilation.objects.all()
+    serializer_class = CompilationSerializer
+
+
+class CompilationCreateView(CreateAPIView):
+    queryset = Compilation.objects.all()
+    serializer_class = CompilationCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CompilationUpdateView(UpdateAPIView):
+    queryset = Compilation.objects.all()
+    serializer_class = CompilationUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CompilationDeleteView(DestroyAPIView):
+    queryset = Compilation.objects.all()
+    serializer_class = CompilationSerializer
+    permission_classes = [IsAuthenticated]
+
+
