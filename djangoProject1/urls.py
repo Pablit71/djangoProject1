@@ -18,9 +18,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-
 from ads import views
-from ads.views import GetAds, LocationSet, UserSet
+from ads.views import GetAds, LocationSet, UserSet, IndexView
+from authentication.views import UserCreateView
 
 router = routers.SimpleRouter()
 router.register('users', UserSet)
@@ -29,9 +29,11 @@ router.register('location', LocationSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api-auth/", include('rest_framework.urls')),
-    path("", views.IndexView.as_view()),
+    path("", IndexView.as_view()),
     path("cat/", include('ads.urls_cat')),
-    path("ads/", include('ads.urls_ads'))
+    path("ads/", include('ads.urls_ads')),
+    path('user/', include('authentication.url_login')),
+
 
 ]
 urlpatterns += router.urls

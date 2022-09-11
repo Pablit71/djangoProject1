@@ -8,12 +8,14 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from ads.models import Category, Ads, User, Location
 from ads.serializers import AdsSerializer, UserSerializer, CategorySerializer, LocationSerializer, \
     CategoryOneSerializer, CategoryDeleteSerializer, AdsDeleteSerializer, AdsOneSerializer, UserOneSerializer, \
     UserDeleteSerializer, LocationDeleteSerializer, LocationOneSerializer
+from authentication.permissions import AdminGetPermission, GetUserPermission
 from djangoProject1 import settings
 
 
@@ -26,32 +28,38 @@ class IndexView(View):
 class GetCat(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, GetUserPermission]
 
 
 class CatOne(RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryOneSerializer
+    permission_classes = [IsAuthenticated, GetUserPermission, AdminGetPermission]
 
 
 class DeleteCat(DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryDeleteSerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 class UpdateCat(UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 class CreateCat(CreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 # ads VIEW
 class GetAds(ListAPIView):
     queryset = Ads.objects.all()
     serializer_class = AdsSerializer
+    permission_classes = [IsAuthenticated, GetUserPermission, AdminGetPermission]
 
     def get(self, request, *args, **kwargs):
         ads_category_id = request.GET.get('cat', None)
@@ -90,21 +98,25 @@ class GetAds(ListAPIView):
 class AdsOne(RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = AdsOneSerializer
+    permission_classes = [IsAuthenticated, GetUserPermission, GetUserPermission]
 
 
 class DeleteAds(DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = AdsDeleteSerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 class UpdateAds(UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = AdsSerializer
+    permission_classes = [IsAuthenticated,  GetUserPermission, GetUserPermission]
 
 
 class CreateAds(CreateAPIView):
     queryset = Category.objects.all()
     serializer_class = AdsSerializer
+    permission_classes = [IsAuthenticated, GetUserPermission, GetUserPermission]
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -132,9 +144,11 @@ class AdsImageView(UpdateView):
 class UserSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]
 
 
 # Location VIEW
 class LocationSet(ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated, AdminGetPermission]

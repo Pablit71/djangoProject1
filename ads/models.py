@@ -1,4 +1,6 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.forms import forms
 
 
 class Category(models.Model):
@@ -44,7 +46,6 @@ class User(models.Model):
         verbose_name = "Продавец"
         verbose_name_plural = "Продавцы"
 
-
     def __str__(self):
         return self.last_name
 
@@ -74,3 +75,13 @@ class Ads(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Compilation(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    name_compilation = ArrayField(models.ManyToManyField(
+        Ads,
+        null=True,
+    ),
+        blank=True)
